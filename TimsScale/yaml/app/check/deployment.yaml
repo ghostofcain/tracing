@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: check
+    demo: "true"
+  name: check
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: check
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: check
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+      - image: jamesgresql/opentelemetry-demo-u_check:0.23
+        name: lower
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_USER
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_PASSWORD
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_HOST
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_NAME
+      restartPolicy: Always
+
+
